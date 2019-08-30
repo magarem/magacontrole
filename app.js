@@ -117,33 +117,6 @@ app.get('/init', function (req, res, next) {
     // });
   })
 
-
-  app.post('/dev-api/cliente', function (req, res, next) {
-
-    console.log('req.body:', req.body);
-
-    db.run('INSERT INTO clientes (nome, tipo, doc, contato, fone, fone2, email, endereco, cep, obs) VALUES (?,?,?,?,?,?,?,?,?,?)',
-            [req.body.nome,
-             req.body.tipo,
-             req.body.doc,
-             req.body.contato,
-             req.body.fone,
-             req.body.fone2,
-             req.body.email,
-             req.body.endereco,
-             req.body.cep,
-             req.body.obs],
-             function(err) {
-                if (err) return console.log(err.message);
-                // get the last insert id
-                console.log(`A row has been inserted with rowid ${this.lastID}`);
-                jsonStr = {code: 20000, data: {id: this.lastID}}
-                res.send(jsonStr);
-             }
-    );
-
-
-  })
 ////////////////////////////////
 // Cadastros
 ////////////////////////////////
@@ -152,11 +125,13 @@ app.get('/init', function (req, res, next) {
   app.get('/dev-api/clientes', function (req, res, next) {
 
     console.log('req.query:', req.query);
+    let strSort = ""
+    let strLimit = ""
     let strWhere = " where 1=1 "
-    let strLimit = " limit " + ((parseInt(req.query.page) - 1) * req.query.limit) + ',' + req.query.limit
-    let strSort = " order by " + req.query.sort.replace('+','').replace('-','')
+    if (req.query.sort) strLimit = " limit " + ((parseInt(req.query.page) - 1) * req.query.limit) + ',' + req.query.limit
+    if (req.query.sort) strSort = " order by " + req.query.sort.replace('+', '').replace('-', '')
 
-    if (req.query.nome){ strWhere += " and nome like '%"+req.query.nome+"%'"}
+    if (req.query.nome){ strWhere += " and nome like '%"+req.query.nome+"%' or doc like '%"+req.query.nome+"%'"}
     if (req.query.doc){ strWhere += " and doc like '%"+req.query.doc+"%'"}
 
     sqlStr = "SELECT count(*) as total FROM clientes " + strWhere

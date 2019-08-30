@@ -1,51 +1,50 @@
 <style scoped>
-/* It is simple way to use scroll bar to table body*/
+  /* It is simple way to use scroll bar to table body*/
 
-.tableBodyScroll thead {
-  background-color: #B38D4F;
-  color: white;
-}
+  .tableBodyScroll thead {
+    background-color: #B38D4F;
+    color: white;
+  }
 
-.tableBodyScroll tbody {
-  display: block;
-  height: 440px;
-  max-height: 440px;
-  overflow-y: scroll;
-}
+  .tableBodyScroll tbody {
+    display: block;
+    height: 440px;
+    max-height: 440px;
+    overflow-y: scroll;
+  }
 
-.tableBodyScroll thead,
+  .tableBodyScroll thead,
 
-tbody tr {
-  display: table;
-  align-content: center;
-  /* width: 100%; */
-  table-layout: fixed;
-}
+  tbody tr {
+    display: table;
+    align-content: center;
+    /* width: 100%; */
+    table-layout: fixed;
+  }
 
-tbody tr div {
-  text-align: center;
-}
-tr:nth-child(even) {
-  background-color: #E6C793
-}
+  tbody tr div {
+    text-align: center;
+  }
+  tr:nth-child(even) {
+    background-color: #E6C793
+  }
 </style>
 <template>
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :span="11">
         <div class="filter-container" style="height: 500px; ">
-
           <el-form :inline="true" class="demo-form-inline">
             <span class="grid-content bg-red" justify="center" style="font-family: tahoma; font-size: 30px;" :style="{color: msgMain.color}">
               {{ msgMain.txt }}
             </span><br><br>
             <el-form-item label="Cliente">
-              <input ref="cliente" v-model="cliente" class="el-input__inner" style="width: 50px; height: 33px;">
+              <input ref="cliente" placeholder="Código" v-model="cliente" class="el-input__inner" style="width: 100px; height: 33px;">
             </el-form-item>
             <el-form-item label="">
-              <input ref="clienteBusca" v-model="clienteBusca" class="el-input__inner" style="width: 250px; height: 33px;" @keyup.enter="getCliente(clienteBusca)">
+              <input ref="clienteBusca" placeholder="Busca pelo nome ou CPF" v-model="clienteBusca" class="el-input__inner" style="width: 250px; height: 33px;" @keyup.enter="getCliente(clienteBusca)">
             </el-form-item>
-            <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="getCliente(cliente)">
+            <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" @click="getCliente(cliente)">
               Buscar
             </el-button>
             <br>
@@ -91,12 +90,18 @@ tr:nth-child(even) {
       </el-col>
       <el-col :span="13">
         <!-- compra itens table -->
-        <!-- <div id=container style=" height: 340px; overflow-y: scroll;"> -->
+        <el-row type="flex" class="row-bg" justify="center" style="background-color: #112940">
+          <el-col :span="24">
+            <div class="grid-content bg-red"  style="font-family: tahoma; font-size: 22px; padding: 16px; color: white; text-align: center">
+              Cupom
+            </div>
+          </el-col>
+        </el-row>
         <table border="0" cellpadding="5" cellspacing="3" class="tableBodyScroll" style="background-color: #FFDCA3;">
           <thead>
-            <tr style="font-size:20px;">
+            <tr style="font-size:16px;">
               <th><div style="width: 30px;">#</div></th>
-              <th><div style="width: 250px;">Produto</div></th>
+              <th><div style="width: 239px;">Produto</div></th>
               <th><div style="width: 40px;">Uni</div></th>
               <th><div style="width: 50px;">N</div></th>
               <th><div style="width: 55px;">$</div></th>
@@ -108,7 +113,7 @@ tr:nth-child(even) {
             <tr v-for="item, index in list" id="tr" style="color: #403729;">
 
               <td id="td" scope="row"><div style="width: 30px;">{{ index + 1 }}</div></td>
-              <td id="td" scope="row"><div style="width: 250px;">{{ item.ean }}<br>{{ item.descricao }}</div></td>
+              <td id="td" scope="row"><div style="width: 239px;">{{ item.ean }}<br>{{ item.descricao }}</div></td>
 
               <td id="td" scope="row"><div style="width: 40px;">{{ item.unidade }}</div></td>
               <td id="td" scope="row"><div style="width: 50px;">{{ item.qnt }}</div></td>
@@ -117,17 +122,11 @@ tr:nth-child(even) {
               <td id="td" scope="row"><div style="width: 55px;">
                 <el-button v-waves class="filter-item" size="small" type="danger" icon="el-icon-remove-outline" @click="handleDelete(item)" />
               </div></td>
-              <!-- <td>{{ item.row.ean }}</td>
-        <td>{{ item.adress }}</td>
-        <td>{{ item.company }}</td>
-        <td>{{ item.fliers }}</td> -->
             </tr>
           </tbody>
         </table>
-
         <!-- </div> -->
         <!-- /compra itens table -->
-        <br>
         <!-- TOTAL -->
         <el-row type="flex" class="row-bg" justify="center" style="background-color: #112940">
           <el-col :span="24">
@@ -135,9 +134,6 @@ tr:nth-child(even) {
               {{ this.totalItens }} Iten(s)  Total: {{ this.totalGeral | money }}
             </div>
           </el-col>
-        </el-row>
-        <el-row type="flex" class="row-bg" justify="center">
-          <el-col :span="3" />
         </el-row>
       </el-col>
     </el-row>
@@ -156,7 +152,7 @@ tr:nth-child(even) {
         </el-form-item>
 
         <el-form-item label="Descrição" prop="descricao">
-          <el-input v-model="temp.descricao" />
+          <el-input ref="form_descricao" v-model="temp.descricao" />
         </el-form-item>
 
         <el-form-item label="Preço custo" prop="preco_custo">
@@ -228,10 +224,10 @@ tr:nth-child(even) {
               <!--el-input v-model="desconto" v-money="money"></el-input-->
               <money v-model="desconto" v-bind="money" class="el-input__inner" />
             </el-form-item>
-            <el-form-item label="Acréscimo">
+            <!--el-form-item label="Acréscimo"-->
               <!--el-input v-model="acrescimo" v-money="money"></el-input-->
-              <money v-model="acrescimo" v-bind="money" class="el-input__inner" />
-            </el-form-item>
+              <!--money v-model="acrescimo" v-bind="money" class="el-input__inner" /-->
+            <!--/el-form-item-->
             <el-form-item label="Total a pagar">
               {{ total_a_pagar | money }}
             </el-form-item>
@@ -805,12 +801,13 @@ export default {
     },
     handleProductCreate(ean) {
       this.resetTemp()
+
       // alert(ean)
       if (ean != null) this.temp.ean = ean
       // this.qnt = 10
       this.temp.id++
-      console.log('this.temp.id:', this.temp.id)
-      console.log('ean:', ean)
+      // console.log('this.temp.id:', this.temp.id)
+      // console.log('ean:', ean)
       this.temp.ean = ean
       this.temp.qnt = this.qnt
       this.temp.unidade = 'uni'
@@ -819,6 +816,7 @@ export default {
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
+        this.$refs.form_descricao.focus()
       })
       this.listQuery.ean = ''
       this.qnt = 1
@@ -832,7 +830,8 @@ export default {
             this.vendaItemId++
             const aux = { id: this.vendaItemId, ean: this.temp.ean, descricao: this.temp.descricao, pco_venda: this.temp.pco_venda, unidade: this.temp.unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda)) }
             console.log(aux)
-            this.list.unshift(aux)
+            this.list.push(aux)
+            this.$refs.ean.focus()
             this.total = this.list.length
 
             this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))
@@ -844,6 +843,13 @@ export default {
             }
 
             console.log('this.totalItens:', this.totalItens)
+
+            this.itemAdd_ean = this.temp.ean
+            this.itemAdd_descricao = this.temp.descricao
+            this.itemAdd_pco_venda = this.temp.pco_venda
+
+            // Zera campo de código
+            this.listQuery.ean = ''
 
             this.dialogFormVisible = false
             this.$notify({
