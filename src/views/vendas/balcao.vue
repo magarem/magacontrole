@@ -50,16 +50,27 @@
             <br>
             <el-form-item label="Quantidade">
               <el-input-number v-model="qnt" :min="1" :max="100" style="width: 120px;" />
-            </el-form-item>
+            </el-form-item><br>
             <el-form-item label="Código">
               <input ref="ean" v-model="listQuery.ean" class="el-input__inner" style="width: 100px; height: 33px;" autofocus @keyup.enter="addList(listQuery.ean)">
               </input>
             </el-form-item>
-            <el-form-item>
+            <!-- <el-form-item> -->
               <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="addList(listQuery.ean)">
                 Incluir
               </el-button>
+            <!-- </el-form-item> -->
+            <el-form-item label="Diversos">
+              <input ref="diversos.txt" v-model="diversos.txt" placeholder="Diversos" class="el-input__inner" style="width: 100px; height: 33px;">
+              </input>
+              <money ref="diversos.valor" v-model="diversos.valor" v-bind="money" class="el-input__inner" style="width: 100px; height: 33px;" @keyup.enter="addDiversos()"/>
             </el-form-item>
+            <el-form-item>
+              <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="addDiversos()">
+                Incluir
+              </el-button>
+            </el-form-item>
+
             <br>
             <!-- <span style='font-size: 20px;'>{{itemAdd_ean}}</span><br> -->
             <!-- <span style='font-size: 20px;'>{{itemAdd_qnt}}</span><br> -->
@@ -69,7 +80,9 @@
             <span v-show="itemAdd_descricao" style="font-size: 24px;">{{ itemAdd_pco_venda | money }}</span><br>
             <!-- <span style='font-size: 20px;'>{{itemAdd_subTotal | money}}</span><br> -->
             <br>
-
+            <el-button v-if=itemAdd_descricao v-waves :loading="downloadLoading" class="filter-item" type="primary" @click="productEdit()">
+              Editar produto
+            </el-button>
             <!-- <el-form-item label="Procurar">
           <input ref="descricao" v-model="listQuery.descricao" class="el-input__inner" style="width: 150px; height: 33px;" @keyup.enter.native="searchProductByDesc(listQuery.descricao);">
           </input>
@@ -85,6 +98,9 @@
           <el-button v-show="totalGeral>0" style="height:60px; font-size:25px; " type="warning" icon="el-icon-close">Cancelar</el-button>
           <el-button v-show="totalGeral>0" style="height:60px; font-size:25px;" type="primary" icon="el-icon-check" @click="vendaClose()">
             Finalizar venda
+          </el-button>
+          <el-button  style="height:60px; font-size:25px;" type="primary" icon="el-icon-check" @click="vendasStackUpload()">
+            upload Vendas
           </el-button>
         </div>
       </el-col>
@@ -152,7 +168,10 @@
         </el-form-item>
 
         <el-form-item label="Descrição" prop="descricao">
-          <el-input ref="form_descricao" v-model="temp.descricao" />
+          <input class=el-input__inner ref="form_descricao" v-model="temp.descricao" />
+          <!-- <el-button  v-waves   type="primary" @click="eansearch()">
+            >>
+          </el-button> -->
         </el-form-item>
 
         <el-form-item label="Preço custo" prop="preco_custo">
@@ -160,7 +179,7 @@
         </el-form-item>
 
         <el-form-item label="Preço" prop="preco_venda">
-          <money v-model="temp.pco_venda" v-bind="money" class="el-input__inner" />
+          <money ref="tempPco_venda" v-model="temp.pco_venda" v-bind="money" class="el-input__inner" />
         </el-form-item>
 
         <el-form-item label="Unidade" prop="unidade">
@@ -205,6 +224,38 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormQntVisible = false">Cancela</el-button>
         <el-button type="primary" @click="updateData()">Confirma</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- Product edit -->
+    <el-dialog :visible.sync="dialogFormProductUpdateVisible" :title="textMap[dialogStatus]" top="5vh">
+      <el-form ref="dataFormProductEdit" :rules="rules" :model="temp2" label-position="left" label-width="140px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="Código" prop="ean">
+          {{ temp2.ean }}
+        </el-form-item>
+
+        <el-form-item label="Descrição" prop="descricao">
+          <el-input ref="form_descricao2" v-model="temp2.descricao" />
+        </el-form-item>
+
+        <el-form-item label="Preço custo" prop="preco_custo">
+          <money v-model="temp2.pco_custo" v-bind="money" class="el-input__inner" />
+        </el-form-item>
+
+        <el-form-item label="Preço" prop="preco_venda">
+          <money v-model="temp2.pco_venda" v-bind="money" class="el-input__inner" />
+        </el-form-item>
+
+        <el-form-item label="Unidade" prop="unidade">
+          <el-input v-model="temp2.unidade" />
+        </el-form-item>
+        <el-form-item label="Estoque" prop="estoque">
+          <el-input v-model="temp2.estoque" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormProductUpdateVisible = false">Cancela</el-button>
+        <el-button type="primary" @click="updateProductEdit()">Confirma</el-button>
       </div>
     </el-dialog>
 
@@ -351,8 +402,16 @@ import Pagination from '@/components/Pagination' // secondary package based on e
 import axios from 'axios'
 import { Money } from 'v-money'
 
+
+
+async function foo(ean){
+    var data = await fetch('http://localhost:8080/eansearch?ean='+ean); // notice the await
+    // code here only executes _after_ the request is done
+    console.log('data:', data);
+    return data // data is defined
+}
 export default {
-  name: 'BalcO',
+  name: 'Balcao',
   components: { Pagination, Money },
   directives: { waves },
   filters: {
@@ -394,10 +453,17 @@ export default {
   data() {
     return {
       msgMain: { txt: 'Caixa livre', color: 'green' },
+      subtotal: 0,
+      diversos: {
+        txt: '',
+        valor: 0
+      },
+      produtos:[],
       cliente: '',
       clienteBusca: '',
       clientesList: [],
       list2: [],
+      dialogFormProductUpdateVisible: false,
       itemAdd_qnt: '',
       itemAdd_descricao: '',
       itemAdd_pco_venda: '',
@@ -414,6 +480,7 @@ export default {
         masked: false /* doesn't work with directive */
       },
       form: {},
+      lastEan: null,
       valor_pago: 0,
       pago_troco: 0,
       pago_dinheiro: 0,
@@ -434,6 +501,7 @@ export default {
       vendaCloseOkVisible: false,
       tableKey: 0,
       list: [],
+      vendasStack: [],
       produtosList: [],
       total: 0,
       totalGeral: 0,
@@ -514,8 +582,97 @@ export default {
 
   },
   created() {
+    if (localStorage.getItem('produtos')) {
+      try {
+        this.produtos = JSON.parse(localStorage.getItem('produtos'));
+      } catch(e) {
+        localStorage.removeItem('produtos');
+      }
+    }else{
+      fetchList().then(response => {
+        // console.log('ferchList.response:', response);
+        this.produtos = response.data.items
+        console.log('this.produtos:', this.produtos);
+        const produtos = JSON.stringify(this.produtos);
+        localStorage.setItem('produtos', produtos);
+      })
+    }
   },
   methods: {
+    eansearch(){
+      var strr = []
+      var self = this
+
+      //console.log('>>>>>', foo(self.temp.ean));
+      return axios.get('http://localhost:8080/eansearch?ean='+self.temp.ean);
+
+      // var request = new XMLHttpRequest();
+      // request.open('GET','http://localhost:8080/eansearch?ean='+self.temp.ean, false)
+      // request.send(null);
+      //
+      // if (request.status === 200) {// That's HTTP for 'ok'
+      //   console.log('request.responseText:', request.responseText);
+      //   return  request.responseText
+      // }
+      // axios.get('http://localhost:8080/eansearch?ean='+self.temp.ean)
+      //   .then(function (response) {
+      //     console.log('ok:', response.data)
+      //     setTimeout(() => {
+      //       self.temp.descricao = response.data;
+      //     }, 10000)
+      //   })
+      //   .catch(function (error) {
+      //     alert(error)
+      // });
+
+      //self.temp.descricao = strr[]
+
+    },
+    vendasStackUpload(){
+      console.log('this.vendasStack:', this.vendasStack);
+      if (this.vendasStack.length > 0) {
+        for (var t=0; t < this.vendasStack.length; t++){
+          axios.post('http://localhost:8080/vendaClose', this.vendasStack[t])
+            .then(function (response) {
+              console.log('ok:', response);
+            })
+            .catch(function (error) {
+              alert('erro')
+          });
+        }
+      }
+      this.$notify({
+        title: 'Sucesso',
+        message: 'Vendas enviado com sucesso',
+        type: 'success',
+        duration: 2000
+      })
+      //Sending Products list
+      axios.post('http://localhost:8080/dev-api/productsList', this.produtos)
+        .then(function (response) {
+          console.log('ok:', response);
+        })
+        .catch(function (error) {
+          alert('erro')
+      });
+      this.$notify({
+        title: 'Sucesso',
+        message: 'Produtos enviado com sucesso',
+        type: 'success',
+        duration: 2000
+      })
+    },
+    productEdit(){
+      var objProduct = {
+        id:this.lastId,
+        ean:this.lastEan,
+        descricao: this.lastDescricao,
+        unidade: this.lastUnidade,
+        pco_venda: this.lastPco_venda,
+        estoque: this.lastEstoque
+      }
+      this.handleProductUpdate(objProduct)
+    },
     indexMethod(index) {
       return index * 2
     },
@@ -595,12 +752,26 @@ export default {
       this.vendaCloseFlg = true
     },
     vendaCloseOk() {
+      var self = this
       this.totalpago = this.pago_dinheiro + this.pago_debito + this.pago_credito
       const a = { vendaID: this.vendaID, cliente: this.cliente, subtotal: this.totalGeral, desconto: this.desconto, acrescimo: this.acrescimo, total: this.total, dinheiro: this.pago_dinheiro, debito: this.pago_debito, credito: this.pago_credito, totalpago: this.totalpago, troco: this.pago_troco, itens: this.list }
       const json = JSON.stringify(a)
       console.log(json)
+
+      // Try save operation in server
+
       const post_data = { json_data: json }
+      // axios.post('http://localhost:8080/vendaClose', post_data)
+
       axios.post('http://localhost:8080/vendaClose', post_data)
+        .then(function (response) {
+          console.log('ok:', response);
+        })
+        .catch(function (error) {
+          self.vendasStack.push(post_data)
+          console.log('error:', error);
+        });
+
 
       // Reset venda
       this.vendaID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
@@ -619,6 +790,9 @@ export default {
       this.listQuery.ean = ''
       this.listQuery.descricao = ''
 
+      this.itemAdd_descricao = ''
+      this.itemAdd_pco_venda = 0
+
       this.vendaCloseFlg = false
       this.vendaCloseOkVisible = true
       this.vendaItem = 0
@@ -634,61 +808,118 @@ export default {
       var container = this.$el.querySelector('#container')
       container.scrollTop = container.scrollHeight
     },
+    addDiversos() {
+
+      this.msgMain = { txt: 'Venda em curso', color: '#886A08' }
+      this.vendaItemId++
+      var descricao = this.diversos.txt||'Diversos'
+      console.log(descricao);
+      this.subtotal = (parseFloat(this.qnt) * parseFloat(this.diversos.valor)) // Calc row subtotal
+      this.list.push({ id: this.vendaItemId, vendaID: this.vendaID, ean: '00001', descricao: descricao, pco_venda: this.diversos.valor, unidade: 'uni', qnt: this.qnt, subtotal: this.subtotal })
+      this.total = 1 // Rows total
+
+      this.itemAdd_ean = '00001'
+      this.itemAdd_descricao = descricao
+      this.itemAdd_unidade = 'Uni'
+      this.itemAdd_pco_venda = this.diversos.valor
+      this.itemAdd_subTotal = this.subtotal
+
+      // Itens sum
+      this.totalItens = 0
+      for (let t = 0; t < this.list.length; t++) {
+        this.totalItens += this.list[t].qnt
+      }
+
+      // Total Calc
+      this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.diversos.valor))
+
+      // Just to simulate the time of the request
+      setTimeout(() => {
+        this.scrollToEnd()
+      }, 0.2 * 1000)
+
+      setTimeout(() => {
+        this.listLoading = false
+      }, 1.5 * 1000)
+
+      // Reset top doc values
+      this.listQuery.ean = ''
+      this.qnt = 1
+
+      // Clean up diversos fields
+      this.diversos.txt = ''
+      this.diversos.valor = 0
+
+      // EAN input focus to get ready to next product EAN enter
+      this.$refs.ean.focus()
+    },
     addList(ean) {
+      console.log('ean:',ean);
+      this.lastEan = ean
       this.msgMain = { txt: 'Venda em curso', color: '#886A08' }
       this.produtosListFlg = false
       this.listLoading = true
 
-      // Search product EAN code in databank
-      fetchList({ ean: ean }).then(response => {
+      // Search product EAN code in produtos
+      var item = this.produtos.find(x => x.ean === ean)
+      console.log('item:', item);
+      // fetchList({ ean: ean }).then(response => {
         // Caso encontre o código de barra no banco executa bloco
-        if (response.data.items.length > 0) {
-          this.vendaItemId++ // add one in venda ID
-          const item = response.data.items[0] // Aux var
-          const subtotal = (parseFloat(this.qnt) * parseFloat(item.pco_venda)) // Calc row subtotal
-          // console.log('item:', item.ean);
-          // Add in list array
-          this.itemN++
-          this.list.push({ id: this.vendaItemId, itemN: this.itemN, vendaID: this.vendaID, ean: item.ean, descricao: item.descricao, pco_venda: item.pco_venda, unidade: item.unidade, qnt: this.qnt, subtotal: subtotal })
-          this.total = response.data.total // Rows total
+      if (item) {
+        this.vendaItemId++ // add one in venda ID
+        // var item = response.data.items[0] // Aux var
+        // var item = produto // Aux var
+        var subtotal = (parseFloat(this.qnt) * parseFloat(item.pco_venda)) // Calc row subtotal
+        // console.log('item:', item.ean);
+        // Add in list array
+        this.itemN++
+        this.list.push({ id: this.vendaItemId, itemN: this.itemN, vendaID: this.vendaID, ean: item.ean, descricao: item.descricao, pco_venda: item.pco_venda, unidade: item.unidade, qnt: this.qnt, subtotal: subtotal })
+        this.total = 1 // Rows total
 
-          this.itemAdd_ean = item.ean
-          this.itemAdd_qnt = item.qnt
-          this.itemAdd_descricao = item.descricao
-          this.itemAdd_descricao = item.descricao
-          this.itemAdd_unidade = item.unidade
-          this.itemAdd_pco_venda = item.pco_venda
-          this.itemAdd_subTotal = subtotal
+        //Aux last variables to edit products
+        this.lastId = item.id
+        this.lastEan = item.ean
+        this.lastDescricao = item.descricao
+        this.lastUnidade = item.unidade
+        this.lastPco_venda = item.pco_venda
 
-          // Itens sum
-          this.totalItens = 0
-          for (let t = 0; t < this.list.length; t++) {
-            this.totalItens += this.list[t].qnt
-          }
 
-          // Total Calc
-          this.totalGeral += (parseFloat(this.qnt) * parseFloat(item.pco_venda))
+        this.itemAdd_ean = item.ean
+        this.itemAdd_qnt = item.qnt
+        this.itemAdd_descricao = item.descricao
+        this.itemAdd_unidade = item.unidade
+        this.itemAdd_pco_venda = item.pco_venda
+        this.itemAdd_subTotal = subtotal
 
-          // Just to simulate the time of the request
-          setTimeout(() => {
-            this.scrollToEnd()
-          }, 0.2 * 1000)
-
-          setTimeout(() => {
-            this.listLoading = false
-          }, 1.5 * 1000)
-
-          // Reset top doc values
-          this.listQuery.ean = ''
-          this.qnt = 1
-
-          // EAN input focus to get ready to next product EAN enter
-          this.$refs.ean.focus()
-        } else {
-          // Caso não encontre o código de barra no banco pula para Incluir
-          this.handleProductCreate(ean)
+        // Itens sum
+        this.totalItens = 0
+        for (let t = 0; t < this.list.length; t++) {
+          this.totalItens += this.list[t].qnt
         }
-      })
+
+        // Total Calc
+        this.totalGeral += (parseFloat(this.qnt) * parseFloat(item.pco_venda))
+
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.scrollToEnd()
+        }, 0.2 * 1000)
+
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
+
+        // Reset top doc values
+        this.listQuery.ean = ''
+        this.qnt = 1
+
+        // EAN input focus to get ready to next product EAN enter
+        this.$refs.ean.focus()
+      } else {
+        // Caso não encontre o código de barra no banco pula para Incluir
+        this.handleProductCreate(ean)
+      }
+      // })
     },
     searchProductByDesc(desc) {
       // Get out empty spaces id desc
@@ -804,65 +1035,115 @@ export default {
 
       // alert(ean)
       if (ean != null) this.temp.ean = ean
-      // this.qnt = 10
-      this.temp.id++
-      // console.log('this.temp.id:', this.temp.id)
-      // console.log('ean:', ean)
-      this.temp.ean = ean
-      this.temp.qnt = this.qnt
-      this.temp.unidade = 'uni'
-      this.temp.estoque = 10
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-        this.$refs.form_descricao.focus()
-      })
-      this.listQuery.ean = ''
-      this.qnt = 1
+
+
+
+      this.eansearch(ean).then((result) => {
+           console.log('result:', result.data);
+
+           this.temp.descricao = result.data
+
+           // if (this.eansearch()) {this.temp.descricao = this.eansearch()}
+
+           // this.$refs.tempPco_venda.focus()
+
+           // this.qnt = 10
+           this.temp.id++
+           // console.log('this.temp.id:', this.temp.id)
+           // console.log('ean:', ean)
+           this.temp.ean = ean
+           this.temp.qnt = this.qnt
+           this.temp.unidade = 'uni'
+           this.temp.estoque = 10
+           this.dialogStatus = 'create'
+           this.dialogFormVisible = true
+           this.$nextTick(() => {
+             this.$refs['dataForm'].clearValidate()
+             this.$refs.form_descricao.focus()
+           })
+           this.listQuery.ean = ''
+           this.qnt = 1
+       })
+
+
     },
     createData() {
+      var self = this
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          create(this.temp).then(() => {
-            // this.list.unshift(this.temp)
-            // Caso encontre o código de barra no banco
-            this.vendaItemId++
-            const aux = { id: this.vendaItemId, ean: this.temp.ean, descricao: this.temp.descricao, pco_venda: this.temp.pco_venda, unidade: this.temp.unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda)) }
-            console.log(aux)
-            this.list.push(aux)
-            this.$refs.ean.focus()
-            this.total = this.list.length
 
-            this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))
+          //Add new product in product array
+          this.vendaItemId++
+          const aux = { id: this.vendaItemId, ean: this.temp.ean, descricao: this.temp.descricao, pco_venda: this.temp.pco_venda, unidade: this.temp.unidade, qnt: this.qnt, subtotal: (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda)) }
+          console.log(aux)
+          this.produtos.push(aux)
 
-            // itens sum
-            this.totalItens = 0
-            for (let t = 0; t < this.list.length; t++) {
-              this.totalItens += this.list[t].qnt
-            }
+          //Add new product in local storage
+          localStorage.removeItem('produtos');
+          localStorage.setItem('produtos', JSON.stringify(this.produtos));
 
-            console.log('this.totalItens:', this.totalItens)
+          this.$refs.ean.focus()
+          this.total = this.produtos.length
 
-            this.itemAdd_ean = this.temp.ean
-            this.itemAdd_descricao = this.temp.descricao
-            this.itemAdd_pco_venda = this.temp.pco_venda
+          this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))
 
-            // Zera campo de código
-            this.listQuery.ean = ''
+          // itens sum
+          this.totalItens = 0
+          for (let t = 0; t < this.list.length; t++) {
+            this.totalItens += this.list[t].qnt
+          }
 
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Sucesso',
-              message: 'Produto cadastrado com sucesso',
-              type: 'success',
-              duration: 2000
+          console.log('this.totalItens:', this.totalItens)
+
+          this.itemAdd_ean = this.temp.ean
+          this.itemAdd_descricao = this.temp.descricao
+          this.itemAdd_pco_venda = this.temp.pco_venda
+
+
+
+          // Add in venda lista
+          this.addList(this.temp.ean)
+
+          // Zera campo de código
+          this.listQuery.ean = ''
+
+          this.dialogFormVisible = false
+
+
+
+          //Add new product in databank
+
+            create(this.temp).then(() => {
+              this.$notify({
+                title: 'Sucesso',
+                message: 'Produto cadastrado com sucesso',
+                type: 'success',
+                duration: 2000
+              })
+            }, function(motivo) {
+              self.$notify({
+                title: 'erro',
+                message: motivo,
+                type: 'error',
+                duration: 2000
+              })
             })
-          })
+
         }
       })
     },
+    handleProductUpdate(row) {
+      console.log(row)
+      this.temp2 = Object.assign({}, row) // copy obj
+      this.temp2.timestamp = new Date(this.temp2.timestamp)
+      this.dialogStatus = 'update'
+      this.dialogFormProductUpdateVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataFormProductEdit'].clearValidate()
+      })
+    },
     handleUpdate(row) {
+      alert(row)
       console.log(row)
       this.temp2 = Object.assign({}, row) // copy obj
       this.temp2.timestamp = new Date(this.temp2.timestamp)
@@ -905,6 +1186,31 @@ export default {
           }
           this.dialogFormQntVisible = false
           // })
+        }
+      })
+    },
+    updateProductEdit() {
+      this.$refs['dataFormProductEdit'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.temp2)
+          // tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+        update(tempData).then(() => {
+          for (const v of this.list) {
+            console.log('this.temp2.id:', this.temp2.id)
+            if (v.id === this.temp2.id) {
+              const index = this.list.indexOf(v)
+              this.list.splice(index, 1, this.temp2)
+              break
+            }
+          }
+          this.dialogFormProductUpdateVisible = false
+          this.$notify({
+            title: 'Sucesso',
+            message: 'Registro alterado',
+            type: 'success',
+            duration: 2000
+          })
+         })
         }
       })
     },

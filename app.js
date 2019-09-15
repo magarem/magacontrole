@@ -4,6 +4,10 @@ const ejs = require('ejs')
 const path = require('path')
 const fs = require('fs');
 
+// AEN code external site search requires
+const rp = require('request-promise');
+const $ = require('cheerio');
+
 var bodyParser = require('body-parser');
 
 // Load sqlite
@@ -47,17 +51,69 @@ function db_populate(){
     });
    }
  }
+function eansearch(ean){
+   console.log(ean)
+   var options = {
+       method: 'GET',
+       uri: 'https://cosmos.bluesoft.com.br/pesquisar',
+       form: {
+           q: ean
+       }
+       // ,
+       // json: true // Automatically stringifies the body to JSON
+   };
+   rp(options)
+     .then(function (body) {
+         var ret = body.split("<h1 class='page-header'>")[1].split('<img alt="Produto Registrado em Brasil"')[0].trim()
+         console.log('ret:', ret);
+         return ret
+     })
+     .catch(function(err){
+       console.log(err);
+     });
+}
 
 
 // Init app
 const app = express();
-
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 
 app.set('view engine', 'ejs');
 app.use(express.static('./public'));
 app.use(cors())
+
+app.get('/eansearch', function (req, res, next) {
+  var ean = req.query.ean
+
+  console.log('req.query.ean:', ean);
+
+
+
+  var options = {
+      method: 'GET',
+      uri: 'https://cosmos.bluesoft.com.br/pesquisar',
+      form: {
+          q: ean
+      }
+      // ,
+      // json: true // Automatically stringifies the body to JSON
+  };
+  rp(options)
+    .then(function (body) {
+        var ret = body.split("<h1 class='page-header'>")[1].split('<img alt="Produto Registrado')[0].trim()
+        console.log('ret:', ret);
+        //ret = {ret: ret}
+        if (ret.indexOf('Resultados da Busca')>-1) { ret = ''}
+        console.log('eansearch(req.query.ean):', ret);
+        res.send(ret)
+    })
+    .catch(function(err){
+      console.log(err);
+    });
+
+
+})
 
 // Begin
 app.get('/init', function (req, res, next) {
@@ -445,6 +501,26 @@ app.get('/init', function (req, res, next) {
                 console.log(`A row has been inserted with rowid ${this.lastID}`);
              }
     );
+    jsonStr = {code: 20000, data: 'success'}
+    res.send(jsonStr);
+  })
+  app.post('/dev-api/productsList', function (req, res, next) {
+
+    console.log('req.body:', req.body);
+
+    // db.run('INSERT INTO produtos (ean, descricao, pco_custo, pco_venda, unidade, estoque) VALUES (?,?,?,?,?,?)',
+    //         [req.body.ean,
+    //          req.body.descricao,
+    //          req.body.pco_custo,
+    //          req.body.pco_venda,
+    //          req.body.unidade,
+    //          req.body.estoque],
+    //          function(err) {
+    //             if (err) return console.log(err.message);
+    //             // get the last insert id
+    //             console.log(`A row has been inserted with rowid ${this.lastID}`);
+    //          }
+    // );
     jsonStr = {code: 20000, data: 'success'}
     res.send(jsonStr);
   })
