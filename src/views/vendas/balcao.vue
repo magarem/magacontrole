@@ -401,11 +401,10 @@ import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import axios from 'axios'
 import { Money } from 'v-money'
-
-
+import {server} from '@/config'
 
 async function foo(ean){
-    var data = await fetch('http://localhost:8080/eansearch?ean='+ean); // notice the await
+    var data = await fetch(process.env.VUE_APP_BASE_API + '/eansearch?ean='+ean); // notice the await
     // code here only executes _after_ the request is done
     console.log('data:', data);
     return data // data is defined
@@ -452,6 +451,8 @@ export default {
   },
   data() {
     return {
+      // server: 'http://localhost:8080',
+      server: server,
       msgMain: { txt: 'Caixa livre', color: 'green' },
       subtotal: 0,
       diversos: {
@@ -604,7 +605,7 @@ export default {
       var self = this
 
       //console.log('>>>>>', foo(self.temp.ean));
-      return axios.get('http://localhost:8080/eansearch?ean='+self.temp.ean);
+      return axios.get(process.env.VUE_APP_BASE_API + '/eansearch?ean='+self.temp.ean);
 
       // var request = new XMLHttpRequest();
       // request.open('GET','http://localhost:8080/eansearch?ean='+self.temp.ean, false)
@@ -629,10 +630,11 @@ export default {
 
     },
     vendasStackUpload(){
+      var self = this
       console.log('this.vendasStack:', this.vendasStack);
       if (this.vendasStack.length > 0) {
         for (var t=0; t < this.vendasStack.length; t++){
-          axios.post('http://localhost:8080/vendaClose', this.vendasStack[t])
+          axios.post(process.env.VUE_APP_BASE_API + '/vendaClose', this.vendasStack[t])
             .then(function (response) {
               console.log('ok:', response);
             })
@@ -648,7 +650,7 @@ export default {
         duration: 2000
       })
       //Sending Products list
-      axios.post('http://localhost:8080/dev-api/productsList', this.produtos)
+      axios.post(process.env.VUE_APP_BASE_API + '/productsList', this.produtos)
         .then(function (response) {
           console.log('ok:', response);
         })
@@ -761,9 +763,9 @@ export default {
       // Try save operation in server
 
       const post_data = { json_data: json }
-      // axios.post('http://localhost:8080/vendaClose', post_data)
+      // axios.post(self.server+'/vendaClose', post_data)
 
-      axios.post('http://localhost:8080/vendaClose', post_data)
+      axios.post(process.env.VUE_APP_BASE_API + '/vendaClose', post_data)
         .then(function (response) {
           console.log('ok:', response);
         })
@@ -963,7 +965,7 @@ export default {
       if (this.clienteBusca.length > 2) {
         this.clientesListFlg = true
         this.listLoading = true
-        axios.get('http://localhost:8080/dev-api/clientes?nome=' + this.clienteBusca)
+        axios.get(process.env.VUE_APP_BASE_API + '/clientes?nome=' + this.clienteBusca)
           .then(function(response) {
             // handle success
             console.log('response:', response.data.data.items)

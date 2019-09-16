@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+import {server} from '@/config'
 
 export function fetchList(query) {
   return request({
-    url: 'http://localhost:8080/dev-api/fornecedores',
+    url: server + '/fornecedores',
     method: 'get',
     params: query
   })
@@ -10,7 +11,7 @@ export function fetchList(query) {
 
 export function fetchList_vendaItens(query) {
   return request({
-    url: 'http://localhost:8080/dev-api/vendaItens',
+    url: server + '/vendaItens',
     method: 'get',
     params: query
   })
@@ -26,7 +27,7 @@ export function fetchArticle(id) {
 
 export function fetchPv(pv) {
   return request({
-    url: 'http://localhost:8080/dev-api/produto',
+    url: server + '/produto',
     method: 'delete',
     params: { pv }
   })
@@ -34,7 +35,7 @@ export function fetchPv(pv) {
 
 export function create(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/fornecedor',
+    url: server + '/fornecedor',
     method: 'post',
     data
   })
@@ -42,7 +43,7 @@ export function create(data) {
 
 export function update(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/fornecedor',
+    url: server + '/fornecedor',
     method: 'patch',
     data
   })
@@ -50,7 +51,7 @@ export function update(data) {
 
 export function deleteItem(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/fornecedor',
+    url: server + '/fornecedor',
     method: 'delete',
     data
   })

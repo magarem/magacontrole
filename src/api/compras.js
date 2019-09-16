@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+import {server} from '@/config'
 
 export function fetchList(query) {
   return request({
-    url: 'http://localhost:8080/dev-api/compras',
+    url: server + '/compras',
     method: 'get',
     params: query
   })
@@ -10,7 +11,7 @@ export function fetchList(query) {
 
 export function fetchList_compraItens(query) {
   return request({
-    url: 'http://localhost:8080/dev-api/compraItens',
+    url: server + '/compraItens',
     method: 'get',
     params: query
   })

@@ -493,7 +493,7 @@ export default {
       const json = JSON.stringify(a)
       console.log(json)
       const post_data = { json_data: json }
-      axios.post('http://localhost:8080/compraClose', post_data)
+      axios.post(process.env.VUE_APP_BASE_API + '/compraClose', post_data)
 
       // Reset compra
       this.compraID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)

@@ -1,0 +1,2 @@
+var server = ''
+export { server }

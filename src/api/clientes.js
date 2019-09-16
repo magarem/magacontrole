@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+import {server} from '@/config'
 
 export function fetchList(query) {
   return request({
-    url: 'http://localhost:8080/dev-api/clientes',
+    url: server + '/clientes',
     method: 'get',
     params: query
   })
@@ -10,7 +11,7 @@ export function fetchList(query) {
 
 export function create(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/cliente',
+    url: server + '/cliente',
     method: 'post',
     data
   })
@@ -18,7 +19,7 @@ export function create(data) {
 
 export function update(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/cliente',
+    url: server + '/cliente',
     method: 'patch',
     data
   })
@@ -26,7 +27,7 @@ export function update(data) {
 
 export function deleteItem(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/cliente',
+    url: server + '/cliente',
     method: 'delete',
     data
   })

@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+import {server} from '@/config'
 
 export function login(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/user/login',
+    url: server + '/user/login',
     method: 'post',
     data
   })

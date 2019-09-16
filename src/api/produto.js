@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+import {server} from '@/config'
 
 export function fetchList(query) {
   return request({
-    url: 'http://localhost:8080/dev-api/produtos',
+    url: server + '/produtos',
     method: 'get',
     params: query
   })
@@ -18,7 +19,7 @@ export function fetch(id) {
 
 export function fetchPv(pv) {
   return request({
-    url: 'http://localhost:8080/dev-api/produto',
+    url: server + '/produto',
     method: 'delete',
     params: { pv }
   })
@@ -26,7 +27,7 @@ export function fetchPv(pv) {
 
 export function create(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/produto',
+    url: server + '/produto',
     method: 'post',
     data
   })
@@ -34,7 +35,7 @@ export function create(data) {
 
 export function update(data) {
   return request({
-    url: 'http://localhost:8080/dev-api/produto',
+    url: server + '/produto',
     method: 'patch',
     data
   })

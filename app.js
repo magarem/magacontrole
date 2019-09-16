@@ -73,6 +73,7 @@ function eansearch(ean){
      });
 }
 
+const environment = '/prod-api' // '/dev-api'
 
 // Init app
 const app = express();
@@ -83,13 +84,8 @@ app.set('view engine', 'ejs');
 app.use(express.static('./public'));
 app.use(cors())
 
-app.get('/eansearch', function (req, res, next) {
+app.get(environment + '/eansearch', function (req, res, next) {
   var ean = req.query.ean
-
-  console.log('req.query.ean:', ean);
-
-
-
   var options = {
       method: 'GET',
       uri: 'https://cosmos.bluesoft.com.br/pesquisar',
@@ -125,7 +121,7 @@ app.get('/init', function (req, res, next) {
 ////////////////////////////////
 
   // login
-  app.post('/dev-api/user/login', function (req, res, next) {
+  app.post(environment + '/user/login', function (req, res, next) {
 
     let username = req.body.username
     let password = req.body.password
@@ -178,7 +174,7 @@ app.get('/init', function (req, res, next) {
 ////////////////////////////////
 
   // Clientes
-  app.get('/dev-api/clientes', function (req, res, next) {
+  app.get(environment + '/clientes', function (req, res, next) {
 
     console.log('req.query:', req.query);
     let strSort = ""
@@ -214,7 +210,7 @@ app.get('/init', function (req, res, next) {
 
 
   })
-  app.post('/dev-api/cliente', function (req, res, next) {
+  app.post(environment + '/cliente', function (req, res, next) {
 
     console.log('req.body:', req.body);
 
@@ -240,7 +236,7 @@ app.get('/init', function (req, res, next) {
 
 
   })
-  app.patch('/dev-api/cliente', function (req, res, next) {
+  app.patch(environment + '/cliente', function (req, res, next) {
     var id = req.body.id
 
     console.log('req.body:', req.body);
@@ -259,7 +255,7 @@ app.get('/init', function (req, res, next) {
       data: 'success'
     })
   })
-  app.delete('/dev-api/cliente', function (req, res, next) {
+  app.delete(environment + '/cliente', function (req, res, next) {
 
     console.log('req.body.id:', req.body.id);
     console.log('req.params.id:', req.params.id);
@@ -278,7 +274,7 @@ app.get('/init', function (req, res, next) {
   })
 
   // Fornecedores
-  app.get('/dev-api/fornecedores', function (req, res, next) {
+  app.get(environment + '/fornecedores', function (req, res, next) {
 
     console.log('req.query:', req.query);
     sqlStr = "SELECT * FROM fornecedores ";
@@ -296,7 +292,7 @@ app.get('/init', function (req, res, next) {
     });
 
   })
-  app.post('/dev-api/fornecedor', function (req, res, next) {
+  app.post(environment + '/fornecedor', function (req, res, next) {
 
     console.log('req.body:', req.body);
 
@@ -321,7 +317,7 @@ app.get('/init', function (req, res, next) {
     jsonStr = {code: 20000, data: 'success'}
     res.send(jsonStr);
   })
-  app.patch('/dev-api/fornecedor', function (req, res, next) {
+  app.patch(environment + '/fornecedor', function (req, res, next) {
     var id = req.body.id
 
     console.log('req.body:', req.body);
@@ -342,7 +338,7 @@ app.get('/init', function (req, res, next) {
       data: 'success'
     })
   })
-  app.delete('/dev-api/fornecedor', function (req, res, next) {
+  app.delete(environment + '/fornecedor', function (req, res, next) {
 
     console.log('req.body.id:', req.body.id);
     console.log('req.params.id:', req.params.id);
@@ -361,7 +357,7 @@ app.get('/init', function (req, res, next) {
   })
 
   // Funcionarios
-  app.get('/dev-api/funcionarios', function (req, res, next) {
+  app.get(environment + '/funcionarios', function (req, res, next) {
 
     console.log('req.query:', req.query);
     let strWhere = " where 1=1 "
@@ -391,7 +387,7 @@ app.get('/init', function (req, res, next) {
       }
     })
   })
-  app.post('/dev-api/funcionario', function (req, res, next) {
+  app.post(environment + '/funcionario', function (req, res, next) {
 
     console.log('req.body:', req.body);
 
@@ -417,7 +413,7 @@ app.get('/init', function (req, res, next) {
 
 
   })
-  app.patch('/dev-api/funcionario', function (req, res, next) {
+  app.patch(environment + '/funcionario', function (req, res, next) {
     var id = req.body.id
 
     console.log('req.body:', req.body);
@@ -436,7 +432,7 @@ app.get('/init', function (req, res, next) {
       data: 'success'
     })
   })
-  app.delete('/dev-api/funcionario', function (req, res, next) {
+  app.delete(environment + '/funcionario', function (req, res, next) {
 
     console.log('req.body.id:', req.body.id);
     console.log('req.params.id:', req.params.id);
@@ -455,7 +451,7 @@ app.get('/init', function (req, res, next) {
   })
 
   // Produtos
-  app.get('/dev-api/produtos', function (req, res, next) {
+  app.get(environment + '/produtos', function (req, res, next) {
     console.log('req.query:', req.query);
 
     var sqlWhere = "where 1=1 "
@@ -484,7 +480,7 @@ app.get('/init', function (req, res, next) {
     });
 
   })
-  app.post('/dev-api/produto', function (req, res, next) {
+  app.post(environment + '/produto', function (req, res, next) {
 
     console.log('req.body:', req.body);
 
@@ -504,7 +500,7 @@ app.get('/init', function (req, res, next) {
     jsonStr = {code: 20000, data: 'success'}
     res.send(jsonStr);
   })
-  app.post('/dev-api/productsList', function (req, res, next) {
+  app.post(environment + '/productsList', function (req, res, next) {
 
     console.log('req.body:', req.body);
 
@@ -524,7 +520,7 @@ app.get('/init', function (req, res, next) {
     jsonStr = {code: 20000, data: 'success'}
     res.send(jsonStr);
   })
-  app.patch('/dev-api/produto', function (req, res, next) {
+  app.patch(environment + '/produto', function (req, res, next) {
 
     var id = req.body.id
     console.log('req.body:', req.body);
@@ -546,7 +542,7 @@ app.get('/init', function (req, res, next) {
       data: 'success'
     })
   })
-  app.delete('/dev-api/produto', function (req, res, next) {
+  app.delete(environment + '/produto', function (req, res, next) {
     var id = req.body.id
     console.log('req.body.id:', req.body.id);
     console.log('req.params.id:', req.params.id);
@@ -581,7 +577,7 @@ app.get('/init', function (req, res, next) {
 //////////////////////////////
 
   // Vendas
-  app.get('/dev-api/vendas', function (req, res, next) {
+  app.get(environment + '/vendas', function (req, res, next) {
     console.log('req.query:', req.query);
 
     var sqlWhere = "where 1=1 "
@@ -609,7 +605,7 @@ app.get('/init', function (req, res, next) {
     });
 
   })
-  app.get('/dev-api/vendaItens', function (req, res, next) {
+  app.get(environment + '/vendaItens', function (req, res, next) {
     console.log('req.query:', req.query);
 
 
@@ -689,7 +685,7 @@ app.get('/init', function (req, res, next) {
 //////////////////////////////
 
   // Compras
-  app.get('/dev-api/compras', function (req, res, next) {
+  app.get(environment + '/compras', function (req, res, next) {
     console.log('req.query:', req.query);
 
     var sqlWhere = "where 1=1 "
@@ -718,7 +714,7 @@ app.get('/init', function (req, res, next) {
     });
 
   })
-  app.get('/dev-api/compraItens', function (req, res, next) {
+  app.get(environment + '/compraItens', function (req, res, next) {
 
     sqlStr = "SELECT * FROM compras_itens where compraId = '" + req.query.compraID + "'" ;
     console.log('sqlStr', sqlStr);
@@ -795,7 +791,7 @@ app.get('/init', function (req, res, next) {
 ////////////////////////////////
 
   // Caixa
-  app.get('/dev-api/caixa', function (req, res, next) {
+  app.get(environment + '/caixa', function (req, res, next) {
     console.log('req.query:', req.query);
     sqlStr = "SELECT * FROM caixa ORDER BY id desc";
     console.log('sqlStr', sqlStr);
@@ -805,7 +801,7 @@ app.get('/init', function (req, res, next) {
       res.send(jsonStr);
     });
   })
-  app.post('/dev-api/caixa', function (req, res, next) {
+  app.post(environment + '/caixa', function (req, res, next) {
     console.log('req.body:', req.body);
     db.run('INSERT INTO caixa (data, historico, entrada, saida, saldo) VALUES (?,?,?,?,?)',
       [req.body.data,
@@ -821,7 +817,7 @@ app.get('/init', function (req, res, next) {
      jsonStr = {code: 20000, data: 'success'}
      res.send(jsonStr);
   })
-  app.patch('/dev-api/caixa', function (req, res, next) {
+  app.patch(environment + '/caixa', function (req, res, next) {
     var id = req.body.id
 
     console.log('req.body:', req.body);
@@ -842,7 +838,7 @@ app.get('/init', function (req, res, next) {
       data: 'success'
     })
   })
-  app.delete('/dev-api/caixa', function (req, res, next) {
+  app.delete(environment + '/caixa', function (req, res, next) {
     console.log('req.body.id:', req.body.id);
     console.log('req.params.id:', req.params.id);
     db.run('DELETE FROM caixa WHERE id = ' + req.body.id);
@@ -850,7 +846,7 @@ app.get('/init', function (req, res, next) {
   })
 
 
-  var port = process.env.PORT || 8080;
+  var port = process.env.PORT || 3000;
   const handleError = (err, res) => {
     res
       .status(500)
