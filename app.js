@@ -626,7 +626,7 @@ app.get('/init', function (req, res, next) {
   })
 
   //Balcao
-  app.post('/vendaClose', function (req, res) {
+  app.post(environment + '/vendaClose', function (req, res) {
     json_data = JSON.parse(req.body.json_data)
 
     let data = new Date()
@@ -733,7 +733,7 @@ app.get('/init', function (req, res, next) {
   })
 
   // Entrada
-  app.post('/compraClose', function (req, res) {
+  app.post(environment + '/compraClose', function (req, res) {
 
     json_data = JSON.parse(req.body.json_data)
 
