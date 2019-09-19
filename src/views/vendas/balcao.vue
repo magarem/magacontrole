@@ -47,6 +47,9 @@
             <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" @click="getCliente(cliente)">
               Buscar
             </el-button>
+            <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" @click="roles()">
+              roles
+            </el-button>
             <br>
             <el-form-item label="Quantidade">
               <el-input-number v-model="qnt" :min="1" :max="100" style="width: 120px;" />
@@ -452,7 +455,7 @@ export default {
   data() {
     return {
       // server: 'http://localhost:8080',
-      server: server,
+      server: (process.env.VUE_APP_BASE_API == '/dev-api') ? 'http://localhost:3000/dev-api' : '/prod-api',
       msgMain: { txt: 'Caixa livre', color: 'green' },
       subtotal: 0,
       diversos: {
@@ -600,12 +603,18 @@ export default {
     }
   },
   methods: {
+    roles(){
+      console.log('>>>',this.$store.getters.roles[0])
+    },
     eansearch(){
       var strr = []
       var self = this
 
       //console.log('>>>>>', foo(self.temp.ean));
-      return axios.get(process.env.VUE_APP_BASE_API + '/eansearch?ean='+self.temp.ean);
+      return axios.get(self.server + '/eansearch?ean='+self.temp.ean, {
+        // Separate configuration
+        withCredentials: true
+    });
 
       // var request = new XMLHttpRequest();
       // request.open('GET','http://localhost:8080/eansearch?ean='+self.temp.ean, false)
@@ -634,7 +643,10 @@ export default {
       console.log('this.vendasStack:', this.vendasStack);
       if (this.vendasStack.length > 0) {
         for (var t=0; t < this.vendasStack.length; t++){
-          axios.post(process.env.VUE_APP_BASE_API + '/vendaClose', this.vendasStack[t])
+          axios.post(self.server + '/vendaClose', this.vendasStack[t], {
+            // Separate configuration
+            withCredentials: true
+          })
             .then(function (response) {
               console.log('ok:', response);
             })
@@ -650,7 +662,10 @@ export default {
         duration: 2000
       })
       //Sending Products list
-      axios.post(process.env.VUE_APP_BASE_API + '/productsList', this.produtos)
+      axios.post(self.server + '/productsList', this.produtos, {
+        // Separate configuration
+        withCredentials: true
+    })
         .then(function (response) {
           console.log('ok:', response);
         })
@@ -765,7 +780,10 @@ export default {
       const post_data = { json_data: json }
       // axios.post(self.server+'/vendaClose', post_data)
 
-      axios.post(process.env.VUE_APP_BASE_API + '/vendaClose', post_data)
+      axios.post(self.server + '/vendaClose', post_data, {
+        // Separate configuration
+        withCredentials: true
+    })
         .then(function (response) {
           console.log('ok:', response);
         })
@@ -965,7 +983,10 @@ export default {
       if (this.clienteBusca.length > 2) {
         this.clientesListFlg = true
         this.listLoading = true
-        axios.get(process.env.VUE_APP_BASE_API + '/clientes?nome=' + this.clienteBusca)
+        axios.get(self.server + '/clientes?nome=' + this.clienteBusca, {
+          // Separate configuration
+          withCredentials: true
+      })
           .then(function(response) {
             // handle success
             console.log('response:', response.data.data.items)

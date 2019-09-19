@@ -9,7 +9,8 @@ const estoqueRouter = {
   name: 'Estoque',
   meta: {
     title: 'Estoque',
-    icon: 'table'
+    icon: 'table',
+    roles: ['admin']
   },
   children: [
     {

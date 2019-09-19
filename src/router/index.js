@@ -101,18 +101,18 @@ export const constantRoutes = [
         meta: { title: 'Profile', icon: 'user', noCache: true }
       }
     ]
-  },
-  cadastrosRouter,
-  comprasRouter,
-  estoqueRouter,
-  vendasRouter,
-  financeiroRouter
+  }
 ]
 /**
  * asyncRoutes
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  cadastrosRouter,
+  comprasRouter,
+  estoqueRouter,
+  vendasRouter,
+  financeiroRouter,
   {
     path: '/permission',
     component: Layout,
@@ -122,7 +122,7 @@ export const asyncRoutes = [
     meta: {
       title: 'Permission',
       icon: 'lock',
-      roles: ['admin', 'editor'] // you can set roles in root nav
+      roles: ['admin'] // you can set roles in root nav
     },
     children: [
       {

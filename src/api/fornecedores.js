@@ -1,9 +1,10 @@
 import request from '@/utils/request'
 import {server} from '@/config'
+var server2 = (process.env.VUE_APP_BASE_API == '/dev-api') ? 'http://localhost:3000/dev-api' : ''
 
 export function fetchList(query) {
   return request({
-    url: server + '/fornecedores',
+    url: server2 + '/fornecedores',
     method: 'get',
     params: query
   })
@@ -11,7 +12,7 @@ export function fetchList(query) {
 
 export function fetchList_vendaItens(query) {
   return request({
-    url: server + '/vendaItens',
+    url: server2 + '/vendaItens',
     method: 'get',
     params: query
   })
@@ -35,7 +36,7 @@ export function fetchPv(pv) {
 
 export function create(data) {
   return request({
-    url: server + '/fornecedor',
+    url: server2 + '/fornecedor',
     method: 'post',
     data
   })
@@ -43,7 +44,7 @@ export function create(data) {
 
 export function update(data) {
   return request({
-    url: server + '/fornecedor',
+    url: server2 + '/fornecedor',
     method: 'patch',
     data
   })
@@ -51,7 +52,7 @@ export function update(data) {
 
 export function deleteItem(data) {
   return request({
-    url: server + '/fornecedor',
+    url: server2 + '/fornecedor',
     method: 'delete',
     data
   })

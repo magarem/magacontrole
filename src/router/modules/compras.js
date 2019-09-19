@@ -9,7 +9,8 @@ const comprasRouter = {
   name: 'Compras',
   meta: {
     title: 'Compras',
-    icon: 'table'
+    icon: 'table',
+    roles: ['admin']
   },
   children: [
     {

@@ -9,7 +9,8 @@ const financeiroRouter = {
   name: 'Financeiro',
   meta: {
     title: 'Financeiro',
-    icon: 'table'
+    icon: 'table',
+    roles: ['admin']
   },
   children: [
     {

@@ -8,15 +8,17 @@ const cadastrosRouter = {
   redirect: '/cadastros',
   name: 'Cadastros',
   meta: {
+
     title: 'Cadastros',
-    icon: 'table'
+    icon: 'table',
+    roles: ['admin']
   },
   children: [
     {
       path: 'clientes',
       component: () => import('@/views/cadastros/clientes'),
       name: 'Clientes',
-      meta: { title: 'Clientes' }
+      meta: {roles: ['admin'], title: 'Clientes' }
     },
     {
       path: 'fornecedores',

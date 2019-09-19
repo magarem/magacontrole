@@ -53,6 +53,7 @@
     "dropzone": "5.5.1",
     "echarts": "4.2.1",
     "element-ui": "2.7.0",
+    "express-session": "^1.16.2",
     "file-saver": "2.0.1",
     "fuse.js": "3.4.4",
     "js-cookie": "2.2.0",

@@ -3,8 +3,22 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">Maga Controle</h3>
       </div>
+
+      <el-form-item prop="empresa">
+        <span class="svg-container">
+          <svg-icon icon-class="star" />
+        </span>
+        <el-input
+          ref="empresa"
+          v-model="loginForm.empresa"
+          placeholder="Empresa"
+          name="empresa"
+          type="text"
+          tabindex="1"
+        />
+      </el-form-item>
 
       <el-form-item prop="username">
         <span class="svg-container">
@@ -13,10 +27,10 @@
         <el-input
           ref="username"
           v-model="loginForm.username"
-          placeholder="Username"
+          placeholder="Usuário"
           name="username"
           type="text"
-          tabindex="1"
+          tabindex="2"
           autocomplete="on"
         />
       </el-form-item>
@@ -31,9 +45,9 @@
             ref="password"
             v-model="loginForm.password"
             :type="passwordType"
-            placeholder="Password"
+            placeholder="Senha"
             name="password"
-            tabindex="2"
+            tabindex="3"
             autocomplete="on"
             @keyup.native="checkCapslock"
             @blur="capsTooltip = false"
@@ -45,9 +59,9 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Entrar</el-button>
 
-      <div style="position:relative">
+      <!-- <div style="position:relative">
         <div class="tips">
           <span>Username : admin</span>
           <span>Password : any</span>
@@ -60,7 +74,7 @@
         <el-button class="thirdparty-button" type="primary" @click="showDialog=true">
           Or connect with
         </el-button>
-      </div>
+      </div> -->
     </el-form>
 
     <el-dialog title="Or connect with" :visible.sync="showDialog">
@@ -97,11 +111,13 @@ export default {
     }
     return {
       loginForm: {
+        empresa: 'data',
         username: 'admin',
-        password: '111111'
+        password: '123456'
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        empresa: [{ required: true, trigger: 'blur'}],
+        // username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       passwordType: 'password',
@@ -164,12 +180,14 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
+          // console.log(this.loginForm)
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               this.loading = false
             })
             .catch(() => {
+              console.log('error!!')
               this.loading = false
             })
         } else {
