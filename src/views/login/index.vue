@@ -97,14 +97,14 @@ export default {
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('Entre com o nome de usuário correto'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+      if (value.length < 5) {
+        callback(new Error('Mínimo de 5 dígitos'))
       } else {
         callback()
       }
@@ -112,7 +112,7 @@ export default {
     return {
       loginForm: {
         empresa: 'data',
-        username: 'admin',
+        username: 'caixa',
         password: '123456'
       },
       loginRules: {
@@ -177,17 +177,18 @@ export default {
       })
     },
     handleLogin() {
+
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          // console.log(this.loginForm)
+          console.log(this.loginForm)
           this.$store.dispatch('user/login', this.loginForm)
-            .then(() => {
+            .then((x) => {
+              console.log(this.redirect);
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               this.loading = false
             })
             .catch(() => {
-              console.log('error!!')
               this.loading = false
             })
         } else {

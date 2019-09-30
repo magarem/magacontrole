@@ -25,18 +25,23 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_NOME: (state, nome) => {
+    state.nome = nome
   }
 }
 
 const actions = {
   // user login
   login({ commit }, userInfo) {
+
     const { empresa, username, password } = userInfo
-    alert('emp:' + empresa)
+    console.log(username)
     return new Promise((resolve, reject) => {
       login({ empresa: empresa, username: username.trim(), password: password }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
+        commit('SET_NOME', username.trim())
         setToken(data.token)
         resolve()
       }).catch(error => {
@@ -57,7 +62,7 @@ const actions = {
         }
 
         const { roles, name, avatar, introduction } = data
-
+        console.log('name:', name);
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')

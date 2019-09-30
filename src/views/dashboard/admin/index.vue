@@ -1,5 +1,5 @@
-<template>
-  <div class="dashboard-editor-container">
+`<template>
+  <div clas`s="dashboard-editor-container">
     <github-corner class="github-corner" />
 
     <panel-group @handleSetLineChartData="handleSetLineChartData" />

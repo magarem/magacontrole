@@ -20,6 +20,7 @@ export function fetch(id) {
 }
 
 export function fetchPv(pv) {
+  // console.log('pv:', pv);
   return request({
     url: server2 + '/produto',
     method: 'delete',

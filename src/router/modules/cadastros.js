@@ -11,7 +11,7 @@ const cadastrosRouter = {
 
     title: 'Cadastros',
     icon: 'table',
-    roles: ['admin']
+    roles: ['admin','editor']
   },
   children: [
     {

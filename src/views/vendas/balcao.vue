@@ -47,20 +47,20 @@
             <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" @click="getCliente(cliente)">
               Buscar
             </el-button>
-            <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" @click="roles()">
-              roles
-            </el-button>
             <br>
             <el-form-item label="Quantidade">
               <el-input-number v-model="qnt" :min="1" :max="100" style="width: 120px;" />
             </el-form-item><br>
-            <el-form-item label="Código">
-              <input ref="ean" v-model="listQuery.ean" class="el-input__inner" style="width: 100px; height: 33px;" autofocus @keyup.enter="addList(listQuery.ean)">
+            <el-form-item label="Código/Nome">
+              <input ref="ean" v-model="listQuery.ean" class="el-input__inner" style="width: 170px; height: 33px;" autofocus @keyup.enter="addList(listQuery.ean)">
               </input>
             </el-form-item>
             <!-- <el-form-item> -->
               <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="addList(listQuery.ean)">
                 Incluir
+              </el-button>
+              <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="searchProductByDesc(listQuery.ean)">
+                Procurar
               </el-button>
             <!-- </el-form-item> -->
             <el-form-item label="Diversos">
@@ -83,9 +83,7 @@
             <span v-show="itemAdd_descricao" style="font-size: 24px;">{{ itemAdd_pco_venda | money }}</span><br>
             <!-- <span style='font-size: 20px;'>{{itemAdd_subTotal | money}}</span><br> -->
             <br>
-            <el-button v-if=itemAdd_descricao v-waves :loading="downloadLoading" class="filter-item" type="primary" @click="productEdit()">
-              Editar produto
-            </el-button>
+
             <!-- <el-form-item label="Procurar">
           <input ref="descricao" v-model="listQuery.descricao" class="el-input__inner" style="width: 150px; height: 33px;" @keyup.enter.native="searchProductByDesc(listQuery.descricao);">
           </input>
@@ -98,13 +96,22 @@
           </el-form>
         </div>
         <div justify="center" style="font-family: tahoma; ">
+          <el-button  v-waves :loading="downloadLoading" class="filter-item" type="primary" @click="productEdit()">
+            Editar
+          </el-button><br>
           <el-button v-show="totalGeral>0" style="height:60px; font-size:25px; " type="warning" icon="el-icon-close">Cancelar</el-button>
           <el-button v-show="totalGeral>0" style="height:60px; font-size:25px;" type="primary" icon="el-icon-check" @click="vendaClose()">
             Finalizar venda
           </el-button>
-          <el-button  style="height:60px; font-size:25px;" type="primary" icon="el-icon-check" @click="vendasStackUpload()">
-            upload Vendas
+          <el-button  style="height:60px; font-size:25px;" type="primary" icon="el-icon-check" @click="handleCaixaPosicao()">
+            Fechar caixa
           </el-button>
+          <el-button  style="height:60px; font-size:25px;" type="primary" icon="el-icon-check" @click="dataUpdate()">
+            Atualizar banco de dados
+          </el-button>
+          <!-- <el-button  style="height:60px; font-size:25px;" type="primary" icon="el-icon-check" @click="vendasStackUpload()">
+            upload Vendas
+          </el-button> -->
         </div>
       </el-col>
       <el-col :span="13">
@@ -201,6 +208,43 @@
         </el-button>
       </div>
     </el-dialog>
+
+
+    <!-- New product -->
+    <el-dialog :visible.sync="dialogCaixaStatus" title="Posição de caixa" top="5vh">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+
+        <el-form-item label="Data" prop="data">
+          <el-input v-model="caixaStatus.data" />
+        </el-form-item>
+
+        <el-form-item label="Usuário" prop="usuario">
+          <el-input v-model="caixaStatus.usuario" />
+        </el-form-item>
+
+        <el-form-item label="Operação" prop="operacao">
+          <el-input v-model="caixaStatus.operacao" />
+        </el-form-item>
+
+        <el-form-item label="Valor" prop="valor">
+          <money v-model="caixaStatus.valor" v-bind="money" class="el-input__inner" />
+          <!-- <el-button  v-waves   type="primary" @click="eansearch()">
+            >>
+          </el-button> -->
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogCaixaStatus = false">
+          Cancela
+        </el-button>
+        <el-button type="primary" @click="setCaixaPosicao()" >
+          Confirma
+        </el-button>
+      </div>
+    </el-dialog>
+
+
+
 
     <!-- Change qnt of row -->
     <el-dialog :visible.sync="dialogFormQntVisible" :title="textMap[dialogStatus]" top="5vh">
@@ -455,6 +499,13 @@ export default {
   data() {
     return {
       // server: 'http://localhost:8080',
+      dialogCaixaStatus: false,
+      caixaStatus:{
+        data: new Date().toLocaleString("pt-BR"),
+        usuario: this.$store.getters.name,
+        operacao: 'abertura',
+        valor: 0
+      },
       server: (process.env.VUE_APP_BASE_API == '/dev-api') ? 'http://localhost:3000/dev-api' : '/prod-api',
       msgMain: { txt: 'Caixa livre', color: 'green' },
       subtotal: 0,
@@ -586,6 +637,7 @@ export default {
 
   },
   created() {
+    this.dialogCaixaStatus = true
     if (localStorage.getItem('produtos')) {
       try {
         this.produtos = JSON.parse(localStorage.getItem('produtos'));
@@ -603,6 +655,45 @@ export default {
     }
   },
   methods: {
+    dataUpdate(){
+      var self = this
+      fetchList().then(response => {
+        self.produtos = response.data.items
+        console.log('this.produtos:', self.produtos);
+        const produtos = JSON.stringify(self.produtos);
+        localStorage.setItem('produtos', produtos);
+      })
+    },
+    handleCaixaPosicao(){
+      this.dialogCaixaStatus = true
+      this.caixaStatus.operacao = 'Fechamento'
+    },
+    setCaixaPosicao(){
+      let vars = { data: new Date().toLocaleString("pt-BR"), usuario: this.$store.getters.name, operacao: this.caixaStatus.operacao, valor: this.caixaStatus.valor }
+      console.log(vars);
+      this.dialogCaixaStatus = false
+      axios.post(this.server + '/setCaixaPosicao', vars, {
+        // Separate configuration
+        withCredentials: true
+      })
+        .then(function (response) {
+          console.log('ok:', response);
+        })
+        .catch(function (error) {
+          alert('erro')
+      });
+    },
+    getCaixaPosicao(){
+      return axios.get(this.server + '/getCaixaPosicao?usuario=' + this.$store.getters.name, {
+        // Separate configuration
+        withCredentials: true
+      }).then(function (response) {
+          console.log('response:', response)
+      //     setTimeout(() => {
+      //       self.temp.descricao = response.data;
+      //     }, 10000)
+      })
+    },
     roles(){
       console.log('>>>',this.$store.getters.roles[0])
     },
@@ -874,72 +965,74 @@ export default {
       this.$refs.ean.focus()
     },
     addList(ean) {
-      console.log('ean:',ean);
-      this.lastEan = ean
-      this.msgMain = { txt: 'Venda em curso', color: '#886A08' }
-      this.produtosListFlg = false
-      this.listLoading = true
+      if (ean.length > 0){
+        console.log('ean:',ean);
+        this.lastEan = ean
+        this.msgMain = { txt: 'Venda em curso', color: '#886A08' }
+        this.produtosListFlg = false
+        this.listLoading = true
 
-      // Search product EAN code in produtos
-      var item = this.produtos.find(x => x.ean === ean)
-      console.log('item:', item);
-      // fetchList({ ean: ean }).then(response => {
-        // Caso encontre o código de barra no banco executa bloco
-      if (item) {
-        this.vendaItemId++ // add one in venda ID
-        // var item = response.data.items[0] // Aux var
-        // var item = produto // Aux var
-        var subtotal = (parseFloat(this.qnt) * parseFloat(item.pco_venda)) // Calc row subtotal
-        // console.log('item:', item.ean);
-        // Add in list array
-        this.itemN++
-        this.list.push({ id: this.vendaItemId, itemN: this.itemN, vendaID: this.vendaID, ean: item.ean, descricao: item.descricao, pco_venda: item.pco_venda, unidade: item.unidade, qnt: this.qnt, subtotal: subtotal })
-        this.total = 1 // Rows total
+        // Search product EAN code in produtos
+        var item = this.produtos.find(x => x.ean === ean)
+        console.log('item:', item);
+        // fetchList({ ean: ean }).then(response => {
+          // Caso encontre o código de barra no banco executa bloco
+        if (item) {
+          this.vendaItemId++ // add one in venda ID
+          // var item = response.data.items[0] // Aux var
+          // var item = produto // Aux var
+          var subtotal = (parseFloat(this.qnt) * parseFloat(item.pco_venda)) // Calc row subtotal
+          // console.log('item:', item.ean);
+          // Add in list array
+          this.itemN++
+          this.list.push({ id: this.vendaItemId, itemN: this.itemN, vendaID: this.vendaID, ean: item.ean, descricao: item.descricao, pco_venda: item.pco_venda, unidade: item.unidade, qnt: this.qnt, subtotal: subtotal })
+          this.total = 1 // Rows total
 
-        //Aux last variables to edit products
-        this.lastId = item.id
-        this.lastEan = item.ean
-        this.lastDescricao = item.descricao
-        this.lastUnidade = item.unidade
-        this.lastPco_venda = item.pco_venda
+          //Aux last variables to edit products
+          this.lastId = item.id
+          this.lastEan = item.ean
+          this.lastDescricao = item.descricao
+          this.lastUnidade = item.unidade
+          this.lastPco_venda = item.pco_venda
 
 
-        this.itemAdd_ean = item.ean
-        this.itemAdd_qnt = item.qnt
-        this.itemAdd_descricao = item.descricao
-        this.itemAdd_unidade = item.unidade
-        this.itemAdd_pco_venda = item.pco_venda
-        this.itemAdd_subTotal = subtotal
+          this.itemAdd_ean = item.ean
+          this.itemAdd_qnt = item.qnt
+          this.itemAdd_descricao = item.descricao
+          this.itemAdd_unidade = item.unidade
+          this.itemAdd_pco_venda = item.pco_venda
+          this.itemAdd_subTotal = subtotal
 
-        // Itens sum
-        this.totalItens = 0
-        for (let t = 0; t < this.list.length; t++) {
-          this.totalItens += this.list[t].qnt
+          // Itens sum
+          this.totalItens = 0
+          for (let t = 0; t < this.list.length; t++) {
+            this.totalItens += this.list[t].qnt
+          }
+
+          // Total Calc
+          this.totalGeral += (parseFloat(this.qnt) * parseFloat(item.pco_venda))
+
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.scrollToEnd()
+          }, 0.2 * 1000)
+
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
+
+          // Reset top doc values
+          this.listQuery.ean = ''
+          this.qnt = 1
+
+          // EAN input focus to get ready to next product EAN enter
+          this.$refs.ean.focus()
+        } else {
+          // Caso não encontre o código de barra no banco pula para Incluir
+          this.handleProductCreate(ean)
         }
-
-        // Total Calc
-        this.totalGeral += (parseFloat(this.qnt) * parseFloat(item.pco_venda))
-
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.scrollToEnd()
-        }, 0.2 * 1000)
-
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-
-        // Reset top doc values
-        this.listQuery.ean = ''
-        this.qnt = 1
-
-        // EAN input focus to get ready to next product EAN enter
-        this.$refs.ean.focus()
-      } else {
-        // Caso não encontre o código de barra no banco pula para Incluir
-        this.handleProductCreate(ean)
+        // })
       }
-      // })
     },
     searchProductByDesc(desc) {
       // Get out empty spaces id desc

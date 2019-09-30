@@ -80,7 +80,7 @@
           <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
             Draft
           </el-button-->
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row)">
             Delete
           </el-button>
         </template>
@@ -364,6 +364,11 @@ export default {
       })
     },
     handleDelete(row) {
+      fetchPv(row.id).then(response => {
+        alert(response.data.pvData)
+        this.pvData = response.data.pvData
+        this.dialogPvVisible = true
+      })
       this.$notify({
         title: 'Success',
         message: 'Delete Successfully',
@@ -375,6 +380,7 @@ export default {
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {
+        alert(response.data.pvData)
         this.pvData = response.data.pvData
         this.dialogPvVisible = true
       })

@@ -87,7 +87,7 @@ app.use(session({
 
 app.use(cors({
     origin:['http://localhost:3000','http://localhost:9527'],
-    methods:['GET','POST', 'PATCH', 'DELETE'],
+    methods:['OPTIONS', 'GET','POST', 'PATCH', 'DELETE'],
     credentials: true // enable set cookie
 }));
 
@@ -180,14 +180,54 @@ app.get('/init', function (req, res, next) {
 ////////////////////////////////
 // Auth
 ////////////////////////////////
+  app.post(environment + '/setCaixaPosicao', function (req, res, next) {
+    let data = req.body.data
+    let operacao = req.body.operacao
+    let usuario = req.body.usuario
+    let valor = req.body.valor
+    console.log(data, operacao, usuario, valor);
+    db_open('./' + req.session.owner + '.db').then(db => {
+      db.run('INSERT INTO caixa_status (data, operacao, usuario, valor) VALUES (?,?,?,?)',
+              [data,
+               operacao,
+               usuario,
+               valor],
+               function(err) {
+                  if (err) return console.log(err.message);
+                  // get the last insert id
+                  console.log(`A row has been inserted with rowid ${this.lastID}`);
+                  res.send(true);
+               }
+      );
+    })
+  })
+
+  app.get(environment + '/getCaixaPosicao', function (req, res, next) {
+    let usuario = req.query.usuario
+    let sqlStr = 'SELECT * FROM caixa_status where usuario like "' + usuario + '" ORDER BY id DESC LIMIT 1'
+    console.log('sqlStr:', sqlStr);
+
+    console.log('./' + req.session.owner + '.db');
+
+    db_open('./' + req.session.owner + '.db').then(db => {
+      // Get  user auth data
+      db.all(sqlStr, (err, row)=>{
+        let pass = false
+        console.log('row:', row);
+
+          pass = true
+          jsonStr = { row: row}
+          console.log('jsonStr:', jsonStr);
+          res.send(jsonStr);
+
+      })
+
+
+      })
+  })
 
   app.get(environment + '/user/info', function (req, res, next) {
-    var ret = {
-      roles: '',
-      name: 'Fidelis',
-      avatar: '',
-      introduction: ''
-    }
+    var ret = {"code":20000,"data":{"roles":["editor"],"introduction":"I am an editor","avatar":"https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif","name":req.session.username}}
     res.send(ret)
   })
 
@@ -200,18 +240,19 @@ app.get('/init', function (req, res, next) {
 
     // store system owner
     req.session.owner = empresa
+    req.session.username = username
 
     console.log('req.session.owner:', req.session.owner);
 
     db_open('./' + empresa + '.db').then(db => {
 
     let sqlStr = 'select * from usuarios where nome like "'+username+'" and senha like "'+password+'"'
-    // console.log('sqlStr:', sqlStr);
+    console.log('sqlStr:', sqlStr);
 
     // Get  user auth data
     db.get(sqlStr, (err, row)=>{
       let pass = false
-
+      console.log('row:', row);
       if (row) {
         pass = true
         jsonStr = {
@@ -638,29 +679,21 @@ app.get('/init', function (req, res, next) {
     })
   })
   app.delete(environment + '/produto', function (req, res, next) {
-    var id = req.body.id
+    var id = req.query.pv
+    console.log('id:', id);
     db_open('./' + req.session.owner + '.db').then(db => {
       db.run(
             'DELETE FROM produtos WHERE id = ?',
-            req.params.id,
+            id,
             function (err, result) {
                 if (err){
                     res.status(400).json({"error": res.message})
                     return;
                 }
                 res.json({"message":"deleted", changes: this.changes})
-        });
+            }
+      );
 
-     res.send({code: 20000,
-               data: {
-                 pvData: [
-                   { key: 'PC', pv: 1024 },
-                   { key: 'mobile', pv: 1024 },
-                   { key: 'ios', pv: 1024 },
-                   { key: 'android', pv: 1024 }
-                 ]
-               }
-             });
     })
   })
 

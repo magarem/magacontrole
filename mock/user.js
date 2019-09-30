@@ -54,7 +54,7 @@ export default [
     response: config => {
       const { token } = config.query
       const info = users[token]
-
+      console.log('info:', info);
       // mock error
       if (!info) {
         return {
