@@ -74,7 +74,7 @@ function eansearch(ean){
      });
 }
 
-const environment = '/prod-api' // '/dev-api' || '/prod-api'
+const environment = '/dev-api' // '/dev-api' || '/prod-api'
 var sess;
 // Init app
 const app = express();

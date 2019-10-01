@@ -157,7 +157,7 @@
         <el-row type="flex" class="row-bg" justify="center" style="background-color: #112940">
           <el-col :span="24">
             <div class="grid-content bg-red" justify="right" style="font-family: tahoma; font-size: 30px; padding: 16px; color: white; text-align: right">
-              {{ this.totalItens }} Iten(s)  Total: {{ this.totalGeral | money }}
+              {{ totalItens }} Iten(s)  Total: {{ totalGeral | money }}
             </div>
           </el-col>
         </el-row>
@@ -1201,7 +1201,7 @@ export default {
           this.$refs.ean.focus()
           this.total = this.produtos.length
 
-          this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))
+          // this.totalGeral += (parseFloat(this.qnt) * parseFloat(this.temp.pco_venda))
 
           // itens sum
           this.totalItens = 0
