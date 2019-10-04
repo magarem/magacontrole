@@ -74,7 +74,7 @@ function eansearch(ean){
      });
 }
 
-const environment = '/dev-api' // '/dev-api' || '/prod-api'
+const environment = '/prod-api' // '/dev-api' || '/prod-api'
 var sess;
 // Init app
 const app = express();
@@ -589,16 +589,24 @@ app.get('/init', function (req, res, next) {
       sqlStr = "SELECT * FROM produtos "+ sqlWhere + " order by id desc " + sqlLimit ;
       console.log('sqlStr', sqlStr);
       db.all(sqlStr, function(err, rows, fields) {
-        // console.log('rows.length:', rows.length);
-        jsonStr = {
-          "code": 20000,
-          "data": {
-              "total": rows.length}
-          }
-         jsonStr.data.items = rows
+        if (rows){
+          jsonStr = {
+            "code": 20000,
+            "data": {
+                "total": rows.length}
+            }
+           jsonStr.data.items = rows
 
-        console.log(jsonStr);
-        res.send(jsonStr);
+          console.log(jsonStr);
+          res.send(jsonStr);
+        }else{
+          jsonStr = {
+            "code": 20000,
+            "data": {
+                "total": 0}
+            }
+          res.send(jsonStr);
+        }
       });
 
       db.close((err) => {
